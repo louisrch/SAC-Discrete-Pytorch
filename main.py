@@ -5,7 +5,7 @@ import gymnasium as gym
 import os, shutil
 import argparse
 import torch
-from utils import get_current_state_embedding
+from utils import get_current_state_embedding, compute_distance
 import threading
 
 '''Hyperparameter Setting'''
@@ -30,6 +30,7 @@ parser.add_argument('--lr', type=float, default=3e-4, help='Learning rate')
 parser.add_argument('--batch_size', type=int, default=256, help='batch size')
 parser.add_argument('--alpha', type=float, default=0.2, help='init alpha')
 parser.add_argument('--adaptive_alpha', type=str2bool, default=True, help='Use adaptive alpha turning')
+parser.add_argument('--distance_type', type=str, default="euclidean", help = "distance metric, either 'euclidean' or 'cosine'")
 opt = parser.parse_args()
 print(opt)
 opt.dvc = "cuda" if torch.cuda.is_available() else "cpu"
@@ -81,7 +82,7 @@ def main():
 			done = False
 			state_embedding = get_current_state_embedding(env=env)
 			goal_embedding = state_embedding
-			distance = 1 / (torch._euclidean_dist(state_embedding, goal_embedding).item()+1)
+			distance = 1 / (compute_distance(state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
 			'''Interact & train'''
 			while not done:
 				#e-greedy exploration
@@ -94,7 +95,7 @@ def main():
 				
 				next_state_embedding = get_current_state_embedding(env=env)
 
-				next_distance = 1 / (torch._euclidean_dist(goal_embedding, next_state_embedding).item()+1)
+				next_distance = 1 / (compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
 
 				r = next_distance
 
