@@ -12,6 +12,8 @@ from torch.utils.data import DataLoader
 import clip
 import numpy as np
 from PIL import Image
+import argparse
+
 
 
 QUERIES = {
@@ -48,14 +50,15 @@ def hard_update(target, source):
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(param.data)
 
-def get_goal_embedding(env_name, env):
-    goal = None
-    if env_name == "CartPole-v1":
-        goal_image = env.render()
-    else:
-        return None
-    embedding = get_image_embedding(goal_image)
+
+# TODO : modularize
+def get_goal_embedding(env, query = "a cartpole standing upright"):
+    embedding = get_text_embedding(clip.tokenize([query]))
     return embedding
+
+def get_text_embedding(text, model=model):
+	with torch.no_grad():
+		return model.encode_text(text)
 
 def get_current_state_embedding(env):
 	image = env.render()
@@ -63,18 +66,16 @@ def get_current_state_embedding(env):
 
 
 def get_image_embedding(image, model = model):
-    """
-    encodes the image using the model
-    image : input image
-    model : encoding model
-    credit : https://github.com/openai/CLIP
-    """
-
-    image_input = Image.fromarray(image)
-    with torch.no_grad():
-        features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
-    return features
-    
+	"""
+	encodes the image using the model
+	image : input image
+	model : encoding model
+	credit : https://github.com/openai/CLIP
+	"""
+	image_input = Image.fromarray(image)
+	with torch.no_grad():
+		features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
+		return features
 
 
 def build_net(layer_shape, hid_activation, output_activation):

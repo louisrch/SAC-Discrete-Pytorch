@@ -5,7 +5,7 @@ import gymnasium as gym
 import os, shutil
 import argparse
 import torch
-from utils import get_current_state_embedding, compute_distance
+from utils import get_current_state_embedding, compute_distance, get_goal_embedding
 import threading
 
 '''Hyperparameter Setting'''
@@ -81,7 +81,7 @@ def main():
 			env_seed += 1
 			done = False
 			state_embedding = get_current_state_embedding(env=env)
-			goal_embedding = state_embedding
+			goal_embedding = get_goal_embedding(env)
 			distance = 1 / (compute_distance(state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
 			'''Interact & train'''
 			while not done:
