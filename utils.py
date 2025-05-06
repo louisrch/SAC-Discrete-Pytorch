@@ -167,3 +167,12 @@ def str2bool(v):
 		return False
 	else:
 		raise argparse.ArgumentTypeError('Boolean value expected.')
+	
+
+def compute_distance(a, b, dist_type = "euclidean"):
+	if dist_type == "euclidean":
+		return torch._euclidean_dist(a,b).item()
+	elif dist_type == "cosine":
+		sim = torch.cosine_similarity(a,b).item()
+		return (1 - sim) / (1+ sim + 1e-4)
+
