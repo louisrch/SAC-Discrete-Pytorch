@@ -60,10 +60,10 @@ def main():
 
 	if opt.write:
 		from torch.utils.tensorboard import SummaryWriter
-		timenow = str(datetime.now())[0:-10]
-		timenow = ' ' + timenow[0:13] + '_' + timenow[-2::]
+		timenow = str(datetime.now())
 		writepath = 'runs/SACD_{}'.format(BriefEnvName[opt.EnvIdex]) + timenow
-		if os.path.exists(writepath): shutil.rmtree(writepath)
+		if os.path.exists(writepath): 
+			shutil.rmtree(writepath)
 		writer = SummaryWriter(log_dir=writepath)
 
 	#Build model
