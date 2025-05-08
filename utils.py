@@ -171,9 +171,18 @@ def str2bool(v):
 	
 
 def compute_distance(a, b, dist_type = "euclidean"):
+	"""
+	distance between a and b is bounded between 0 and infty
+	"""
 	if dist_type == "euclidean":
 		return torch._euclidean_dist(a,b).item()
 	elif dist_type == "cosine":
 		sim = torch.cosine_similarity(a,b).item()
-		return (1 - sim) / (1+ sim + 1e-4)
+		return (1 - sim) / (1+ sim + 1e-6)
 
+
+def compute_reward(a, b, dist_type = "euclidean"):
+	"""
+	bijection from [0, infty) to [0,1)
+	"""
+	return 2*torch.sigmoid(compute_distance(a,b,dist_type=dist_type)) - 1

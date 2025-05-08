@@ -10,6 +10,7 @@ class SACD_agent():
 	def __init__(self, **kwargs):
 		# Init hyperparameters for agent, just like "self.gamma = opt.gamma, self.lambd = opt.lambd, ..."
 		self.__dict__.update(kwargs)
+		print(self.dvc)
 		self.tau = 0.005
 		self.H_mean = 0
 		self.replay_buffer = ReplayBuffer(self.state_dim, self.dvc, max_size=int(1e6))
