@@ -125,6 +125,11 @@ class ReplayBuffer(object):
 		self.r = torch.zeros((max_size, 1),dtype=torch.float,device=self.dvc)
 		self.s_next = torch.zeros((max_size, state_dim),dtype=torch.float,device=self.dvc)
 		self.dw = torch.zeros((max_size, 1),dtype=torch.bool,device=self.dvc)
+	
+	def addAll(self, s_array, a_array,  r_array, s_next_array, dw_array):
+		for s, a, r, s_next, dw in zip(s_array, a_array, r_array, s_next_array, dw_array):
+			self.add(s,a,r,s_next,dw)
+		
 
 	def add(self, s, a, r, s_next, dw):
 		self.s[self.ptr] = torch.from_numpy(s).to(self.dvc)
@@ -185,4 +190,13 @@ def compute_reward(a, b, dist_type = "euclidean"):
 	"""
 	bijection from [0, infty) to [0,1)
 	"""
-	return 2*torch.sigmoid(compute_distance(a,b,dist_type=dist_type)) - 1
+	return torch.exp(-compute_distance(a,b,dist_type=dist_type))
+
+def compute_rewards(rgb_imgs, goal, model=model):
+	images = []
+	for i in rgb_imgs:
+		images.append(Image.fromarray(i))
+	embeddings = model.encode_image(preprocess(images).unsqueeze(0).to(device))
+	diff = embeddings - goal
+	# L2 norm squared
+	return diff @ diff
