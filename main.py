@@ -73,12 +73,12 @@ def main():
 		agent.load(opt.ModelIdex, BriefEnvName[opt.EnvIdex])
 	else:
 		total_steps = 0
-		depictions = []
-		actions = []
-		dws = []
+		# depictions = []
+		# actions = []
+		# dws = []
 		s, _ = env.reset(seed=env_seed)
 		goal_embedding = get_goal_embedding(env)
-		states = [s]
+		# states = [s]
 		while total_steps < opt.Max_train_steps:
 			s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
 			env_seed += 1
@@ -94,29 +94,29 @@ def main():
 				s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
 				done = (dw or tr)
 
-				depictions.append(env.render())
-				states.append(s)
-				actions.append(a)
-				dws.append(dw)
+				# depictions.append(env.render())
+				# states.append(s)
+				# actions.append(a)
+				# dws.append(dw)
 				
-				if total_steps % opt.update_every == 0:
-					# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
-					dump_infos_to_replay_buffer(states, actions, depictions, dws, goal_embedding, agent)
-					states = []
-					actions = []
-					dws = []
-				#next_state_embedding = get_current_state_embedding(env=env)
+				# if total_steps % opt.update_every == 0:
+				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
+				# 	dump_infos_to_replay_buffer(states, actions, depictions, dws, goal_embedding, agent)
+				# 	states = []
+				# 	actions = []
+				# 	dws = []
+				next_state_embedding = get_current_state_embedding(env=env)
 
-				#next_distance = 1 / (compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
+				next_distance = 1 / (compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
 
-				#r = next_distance
+				r = next_distance
 
 
 
 				if opt.EnvIdex == 1:
 					if r <= -100: r = -10  # good for LunarLander
 
-				#agent.replay_buffer.add(s, a, r, s_next, dw)
+				agent.replay_buffer.add(s, a, r, s_next, dw)
 				s = s_next
 
 				'''update if its time'''

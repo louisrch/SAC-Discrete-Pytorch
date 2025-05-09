@@ -194,12 +194,13 @@ def compute_reward(a, b, dist_type = "euclidean"):
 
 def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
-	for i in rgb_imgs:
-		embeddings.append(model.encode_image(preprocess(Image.fromarray(i)).unsqueeze(0).to(device)))
-	embeddings = torch.stack(embeddings)
-	distance = torch._euclidean_dist(embeddings, goal)
-	# L2 norm squared
-	return distance
+	with torch.no_grad():
+		for i in rgb_imgs:
+			embeddings.append(model.encode_image(preprocess(Image.fromarray(i)).unsqueeze(0).to(device)))
+		embeddings = torch.stack(embeddings)
+		distance = compute_reward(embeddings, goal)
+		# L2 norm squared
+		return distance
 
 
 def dump_infos_to_replay_buffer(states, actions, depictions, dws, goal, agent):
