@@ -7,6 +7,8 @@ import argparse
 import torch
 import utils
 import threading
+from PIL import Image
+
 '''Hyperparameter Setting'''
 parser = argparse.ArgumentParser()
 parser.add_argument('--dvc', type=str, default='cpu', help='running device: cuda or cpu')
@@ -97,7 +99,7 @@ def main():
 				s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
 				done = (dw or tr)
 
-				depictions.append(torch.from_numpy(env.render()).to(opt.dvc))
+				depictions.append(torch.from_numpy(Image.fromarray(env.render())).to(opt.dvc))
 				states.append(s)
 				actions.append(a)
 				dws.append(dw)
