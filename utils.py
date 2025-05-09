@@ -20,10 +20,9 @@ QUERIES = {
     "CartPole-v1" : "What is in this picture ? The goal of the agent is to keep the pole upright. Is the pole upright in this picture ? If not, edit this picture, while preserving the proportions, such that the pole is upright. If it is already upright, do not do anything." 
 }
 
-device = "cpu"
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32",device=device)
-print(model.device)
-
+model = model.to(device)
 def get_preprocessing(img):
 	return preprocess(img)
 
