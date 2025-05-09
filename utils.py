@@ -196,6 +196,7 @@ def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
 	for i in rgb_imgs:
 		embeddings.append(model.encode_image(preprocess(Image.fromarray(i)).unsqueeze(0).to(device)))
+		print(embeddings[-1])
 	embeddings = torch.tensor(embeddings)
 	diff = embeddings - goal
 	# L2 norm squared
