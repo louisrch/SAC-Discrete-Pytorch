@@ -5,7 +5,7 @@ import gymnasium as gym
 import os, shutil
 import argparse
 import torch
-from utils import get_current_state_embedding, compute_distance, get_goal_embedding, compute_rewards
+from utils import get_current_state_embedding, compute_distance, get_goal_embedding, compute_rewards, dump_infos_to_replay_buffer
 import threading
 '''Hyperparameter Setting'''
 parser = argparse.ArgumentParser()
@@ -74,12 +74,11 @@ def main():
 	else:
 		total_steps = 0
 		depictions = []
-		states = []
 		actions = []
 		dws = []
 		s, _ = env.reset(seed=env_seed)
 		goal_embedding = get_goal_embedding(env)
-
+		states = [s]
 		while total_steps < opt.Max_train_steps:
 			s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
 			env_seed += 1
@@ -100,6 +99,12 @@ def main():
 				actions.append(a)
 				dws.append(dw)
 				
+				if total_steps % opt.update_every == 0:
+					# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
+					dump_infos_to_replay_buffer(states, actions, depictions, dws, goal_embedding, agent)
+					states = []
+					actions = []
+					dws = []
 				#next_state_embedding = get_current_state_embedding(env=env)
 
 				#next_distance = 1 / (compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
@@ -117,14 +122,6 @@ def main():
 				'''update if its time'''
 				# train 50 times every 50 steps rather than 1 training per step. Better!
 				if total_steps >= opt.random_steps and total_steps % opt.update_every == 0:
-					states.append(s)
-					rewards = compute_rewards(depictions, goal_embedding)
-					next_states = states[1:]
-					states = states[:-1]
-					agent.replay_buffer.addAll(states, actions, rewards, next_states, dws)
-					states = []
-					actions = []
-					dws = []
 					for j in range(opt.update_every):
 						agent.train()
 					
@@ -145,6 +142,7 @@ def main():
 					agent.save(int(total_steps/1000), BriefEnvName[opt.EnvIdex])
 	env.close()
 	eval_env.close()
+
 
 
 if __name__ == '__main__':

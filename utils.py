@@ -200,3 +200,10 @@ def compute_rewards(rgb_imgs, goal, model=model):
 	distance = torch._euclidean_dist(embeddings, goal)
 	# L2 norm squared
 	return distance
+
+
+def dump_infos_to_replay_buffer(states, actions, depictions, dws, goal, agent):
+	rewards = compute_rewards(depictions, goal)
+	next_states = states[1:]
+	states = states[:-1]
+	agent.replay_buffer.addAll(states, actions, rewards, next_states, dws)
