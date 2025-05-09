@@ -201,9 +201,9 @@ def compute_distance(a, b, dist_type = "euclidean"):
 	distance between a and b is bounded between 0 and infty
 	"""
 	if dist_type == "euclidean":
-		return torch._euclidean_dist(a,b).item()
+		return torch._euclidean_dist(a,b)
 	elif dist_type == "cosine":
-		sim = torch.cosine_similarity(a,b).item()
+		sim = torch.cosine_similarity(a,b)
 		return (1 - sim) / (1+ sim + 1e-6)
 
 
@@ -211,7 +211,7 @@ def compute_reward(a, b, dist_type = "euclidean"):
 	"""
 	bijection from [0, infty) to [0,1)
 	"""
-	return torch.exp(-compute_distance(a,b,dist_type=dist_type))
+	return torch.exp(-compute_distance(a,b,dist_type=dist_type)).item()
 
 def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
