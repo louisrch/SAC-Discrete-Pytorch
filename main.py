@@ -99,7 +99,7 @@ def main():
 				s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
 				done = (dw or tr)
 
-				depictions.append(torch.from_numpy(Image.fromarray(env.render())).to(opt.dvc))
+				depictions.append(torch.from_numpy(env.render()).to(opt.dvc))
 				states.append(s)
 				actions.append(a)
 				dws.append(dw)

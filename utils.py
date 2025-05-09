@@ -212,7 +212,7 @@ def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
 	with torch.no_grad():
 		for i in rgb_imgs:
-			embeddings.append(model.encode_image(preprocess(Image.fromarray(i)).unsqueeze(0).to(device)))
+			embeddings.append(model.encode_image(preprocess(i).unsqueeze(0).to(device)))
 		embeddings = torch.stack(embeddings)
 		distance = compute_reward(embeddings, goal)
 		# L2 norm squared
