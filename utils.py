@@ -50,6 +50,13 @@ def hard_update(target, source):
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(param.data)
 
+def save_goal_image(env):
+	# whatever this is, fix later, too lazy rn ngl
+	path = "goal.png"
+	img = env.render()
+	img = Image.fromarray(img)
+	img.save(path)
+	return path
 
 # TODO : modularize
 def get_goal_embedding(mode, env_name = "CartPole-v1", sys_path_to_goal= None):
@@ -166,7 +173,6 @@ def evaluate_policy(env, agent, turns = 3):
 			a = agent.select_action(s, deterministic=True)
 			s_next, r, dw, tr, info = env.step(a)
 			done = (dw or tr)
-
 			total_scores += r
 			s = s_next
 	return int(total_scores/turns)
