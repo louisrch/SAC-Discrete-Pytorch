@@ -22,6 +22,7 @@ QUERIES = {
 
 device = "cpu"
 model, preprocess = clip.load("ViT-B/32",device=device)
+print(model.device)
 
 def get_preprocessing(img):
 	return preprocess(img)
