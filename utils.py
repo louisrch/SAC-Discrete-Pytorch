@@ -211,7 +211,7 @@ def compute_reward(a, b, dist_type = "euclidean"):
 	"""
 	bijection from [0, infty) to [0,1)
 	"""
-	return torch.exp(-compute_distance(a,b,dist_type=dist_type)).item()
+	return torch.exp(-compute_distance(a,b,dist_type=dist_type))
 
 def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
