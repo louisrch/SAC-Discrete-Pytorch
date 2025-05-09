@@ -82,9 +82,9 @@ def get_image_embedding(image, model = model):
 	model : encoding model
 	credit : https://github.com/openai/CLIP
 	"""
-	#image_input = Image.fromarray(image)
+	image_input = Image.fromarray(image)
 	with torch.no_grad():
-		features = model.encode_image(preprocess(image).unsqueeze(0).to(device))
+		features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
 		return features
 
 
