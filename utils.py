@@ -216,7 +216,7 @@ def compute_reward(a, b, dist_type = "euclidean"):
 def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
 	with torch.no_grad():
-		model.encode_image(rgb_imgs)
+		embeddings = model.encode_image(rgb_imgs)
 		rewards = compute_reward(embeddings, goal)
 		# L2 norm squared
 		return rewards
