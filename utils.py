@@ -23,6 +23,8 @@ QUERIES = {
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32",device=device)
 model = model.to(device)
+
+
 def get_preprocessing(img):
 	return preprocess(img)
 
@@ -73,12 +75,12 @@ def get_goal_embedding(mode, env_name = "CartPole-v1", sys_path_to_goal= None):
 
 
 def get_goal_embedding(env, query = "a cartpole standing upright"):
-    embedding = get_text_embedding(clip.tokenize([query]))
+    embedding = get_text_embedding(clip.tokenize([query]).to(device))
     return embedding
 
-def get_text_embedding(text, model=model):
+def get_text_embedding(tokens, model=model):
 	with torch.no_grad():
-		return model.encode_text(text)
+		return model.encode_text(tokens)
 
 def get_current_state_embedding(env):
 	image = env.render()
