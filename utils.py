@@ -52,6 +52,16 @@ def hard_update(target, source):
 
 
 # TODO : modularize
+def get_goal_embedding(mode, env_name = "CartPole-v1", sys_path_to_goal= None):
+	if mode == "image":
+		img = Image.open(sys_path_to_goal)
+		return get_image_embedding(img)
+	elif mode == "text":
+		query = QUERIES[env_name]
+		return get_text_embedding(clip.tokenize([query]))
+
+
+
 def get_goal_embedding(env, query = "a cartpole standing upright"):
     embedding = get_text_embedding(clip.tokenize([query]))
     return embedding
@@ -72,9 +82,9 @@ def get_image_embedding(image, model = model):
 	model : encoding model
 	credit : https://github.com/openai/CLIP
 	"""
-	image_input = Image.fromarray(image)
+	#image_input = Image.fromarray(image)
 	with torch.no_grad():
-		features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
+		features = model.encode_image(preprocess(image).unsqueeze(0).to(device))
 		return features
 
 
