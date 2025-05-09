@@ -23,6 +23,9 @@ QUERIES = {
 device = "cpu"
 model, preprocess = clip.load("ViT-B/32",device=device)
 
+def get_preprocessing(img):
+	return preprocess(img)
+
 
 def create_log_gaussian(mean, log_std, t):
     quadratic = -((0.5 * (t - mean) / (log_std.exp())).pow(2))

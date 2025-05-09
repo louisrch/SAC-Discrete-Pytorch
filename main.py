@@ -33,6 +33,7 @@ parser.add_argument('--alpha', type=float, default=0.2, help='init alpha')
 parser.add_argument('--adaptive_alpha', type=str2bool, default=True, help='Use adaptive alpha turning')
 parser.add_argument('--distance_type', type=str, default="euclidean", help = "distance metric, either 'euclidean' or 'cosine'")
 parser.add_argument("--mode", type=str, default="image", help="image or text mode")
+parser.add_argument("--dump_every", type=int, default=20, help= "frequency at which to dump rewards in the replaybuffer")
 opt = parser.parse_args()
 print(opt)
 opt.dvc = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -99,12 +100,12 @@ def main():
 				s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
 				done = (dw or tr)
 
-				depictions.append(torch.from_numpy(env.render()).to(opt.dvc))
+				depictions.append(utils.get_preprocessing(torch.from_numpy(env.render())).to(opt.dvc))
 				states.append(s)
 				actions.append(a)
 				dws.append(dw)
 				
-				if total_steps % opt.update_every == 0:
+				if total_steps % opt.dump_every == 0:
 				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
 					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions), dws, goal_embedding, agent)
 					states = []
