@@ -193,10 +193,10 @@ def compute_reward(a, b, dist_type = "euclidean"):
 	return torch.exp(-compute_distance(a,b,dist_type=dist_type))
 
 def compute_rewards(rgb_imgs, goal, model=model):
-	images = []
+	embeddings = []
 	for i in rgb_imgs:
-		images.append(Image.fromarray(i))
-	embeddings = model.encode_image(preprocess(images).unsqueeze(0).to(device))
+		embeddings.append(model.encode_image(preprocess(Image.fromarray(i)).unsqueeze(0).to(device)))
+	embeddings = torch.tensor(embeddings)
 	diff = embeddings - goal
 	# L2 norm squared
 	return diff @ diff

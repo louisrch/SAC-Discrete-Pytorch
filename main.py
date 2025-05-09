@@ -20,7 +20,7 @@ parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--Max_train_steps', type=int, default=10000, help='Max training steps')
 parser.add_argument('--save_interval', type=int, default=1e5, help='Model saving interval, in steps.')
 parser.add_argument('--eval_interval', type=int, default=2e3, help='Model evaluating interval, in steps.')
-parser.add_argument('--random_steps', type=int, default=1e4, help='steps for random policy to explore')
+parser.add_argument('--random_steps', type=int, default=1e3, help='steps for random policy to explore')
 parser.add_argument('--update_every', type=int, default=100, help='training frequency')
 
 parser.add_argument('--gamma', type=float, default=0.99, help='Discounted Factor')
@@ -71,18 +71,19 @@ def main():
 	agent = SACD_agent(**vars(opt))
 	if opt.Loadmodel: 
 		agent.load(opt.ModelIdex, BriefEnvName[opt.EnvIdex])
-
 	else:
 		total_steps = 0
 		depictions = []
 		states = []
 		actions = []
 		dws = []
+		s, _ = env.reset(seed=env_seed)
+		goal_embedding = get_goal_embedding(env)
+
 		while total_steps < opt.Max_train_steps:
 			s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
 			env_seed += 1
 			done = False
-			goal_embedding = get_goal_embedding(env)
 			#distance = torch.sigmoid(compute_distance(state_embedding, goal_embedding, dist_type = opt.distance_type))
 			'''Interact & train'''
 			while not done:
