@@ -233,4 +233,5 @@ def dump_infos_to_replay_buffer(states, actions, depictions, dws, goal, agent):
 	rewards = compute_rewards(depictions, goal)
 	next_states = states[1:]
 	states = states[:-1]
+	print(len(states), len(next_states), len(actions))
 	agent.replay_buffer.addAll(states, actions, rewards, next_states, dws)
