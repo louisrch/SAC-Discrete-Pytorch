@@ -83,7 +83,7 @@ def main():
 		dws = []
 		s, _ = env.reset(seed=env_seed)
 
-		goal_embedding = utils.get_goal_embedding(env, model)
+		goal_embedding = utils.get_image_embedding(env.render(), model)
 		states = []
 		while total_steps < opt.Max_train_steps:
 			s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
