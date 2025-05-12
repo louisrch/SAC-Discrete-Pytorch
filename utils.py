@@ -218,7 +218,7 @@ def compute_reward(a, b, dist_type = "euclidean"):
 def compute_rewards(rgb_imgs, goal, model):
 	with torch.inference_mode():
 		embeddings = model.forward_image(rgb_imgs)
-		print(embeddings)
+		#print(embeddings)
 		#print(embeddings.size(), goal.size(), rgb_imgs.size())
 		rewards = compute_reward(embeddings, goal)
 		# L2 norm squared
@@ -251,11 +251,11 @@ class Model():
 			self.std = torch.tensor([0.26862954, 0.26130258, 0.27577711], device=self.dvc).view(1,3,1,1)
 			self.mean = torch.tensor([0.48145466, 0.4578275, 0.40821073], device=self.dvc).view(1,3,1,1)
 		elif self.model == "DINOV2":
-			model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14_reg')
+			self.model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14_reg')
 			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.dvc).view(1,3,1,1)
 			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.dvc).view(1,3,1,1)
 		self.img_size = 224
-		print(self.__dict__)
+		#print(self.__dict__)
 
 	def get_fast_preprocessing(self, img_np : np.ndarray, input_height = 224, input_width = 224):
 		""""
@@ -272,8 +272,8 @@ class Model():
 
 	def forward_image(self, image):
 		if self.model == "CLIP":
-			return self.encode_image(image)
+			return self.model.encode_image(image)
 		elif self.model == "DINOV2":
-			return self.forward(image)
+			return self.model.forward(image)
 
 
