@@ -81,16 +81,15 @@ def get_current_state_embedding(env):
 	return get_image_embedding(image)
 
 
-def get_image_embedding(image, model = model):
+def get_image_embedding(image, model):
 	"""
 	encodes the image using the model
 	image : input image
 	model : encoding model
 	credit : https://github.com/openai/CLIP
 	"""
-	image_input = Image.fromarray(image)
 	with torch.no_grad():
-		features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
+		features = model.forward_image(model.get_fast_preprocessing(image))
 		return features
 
 
@@ -215,9 +214,8 @@ def compute_reward(a, b, dist_type = "euclidean"):
 	return torch.exp(-compute_distance(a,b,dist_type=dist_type))
 
 def compute_rewards(rgb_imgs, goal, model):
-	embeddings = []
 	with torch.inference_mode():
-		embeddings = model.encode_image(rgb_imgs)
+		embeddings = model.forward_image(rgb_imgs)
 		#print(embeddings.size(), goal.size(), rgb_imgs.size())
 		rewards = compute_reward(embeddings, goal)
 		# L2 norm squared
@@ -263,5 +261,10 @@ class Model():
 		img_tensor = (img_tensor - self.mean).div(self.std)
 		return img_tensor
 
+	def forward_image(self, image):
+		if self.model == "CLIP":
+			return self.encode_image(image)
+		elif self.model == "DINOV2":
+			return self.forward(image)
 
 
