@@ -255,7 +255,7 @@ class Model():
 			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.dvc).view(1,3,1,1)
 			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.dvc).view(1,3,1,1)
 		self.img_size = 224
-		print(self.__dict__)
+		#print(self.__dict__)
 
 	def get_fast_preprocessing(self, img_np : np.ndarray, output_height : int = 224, output_width : int = 224) -> torch.Tensor:
 		""""
@@ -272,7 +272,7 @@ class Model():
 
 	def forward_image(self, image : torch.Tensor) -> torch.Tensor:
 		if self.model == "CLIP":
-			print("here", image.size())
+			#print("here", image.size())
 			return self.encoder.encode_image(image)
 		elif self.model == "DINOV2":
 			return self.encoder.forward(image)
