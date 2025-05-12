@@ -72,6 +72,8 @@ def get_goal_embedding(env, query = "a cartpole standing upright"):
     embedding = get_text_embedding(clip.tokenize([query]).to(device))
     return embedding
 
+
+
 def get_text_embedding(tokens, model):
 	with torch.no_grad():
 		return model.encode_text(tokens)
@@ -256,8 +258,12 @@ class Model():
 	def get_fast_preprocessing(self, img_np : np.ndarray, input_height = 224, input_width = 224):
 		""""
 		img_np : N x H x W x 3 RGB image
+		output : N x 3 x input_height x input_width image
 		"""
-		img_tensor = torch.from_numpy(img_np).permute(1,3).permute(2,3).to(device, non_blocking=True)
+		img_tensor = torch.from_numpy(img_np)
+		if img_tensor.ndim == 3:
+			img_tensor = torch.unsqueeze(img_tensor, 0)
+		img_tensor = img_tensor.permute(0,3,1,2).to(device, non_blocking=True)
 		img_tensor = F.interpolate(img_tensor, size=(input_height, input_width), mode='bilinear', align_corners=False)
 		img_tensor = (img_tensor - self.mean).div(self.std)
 		return img_tensor
