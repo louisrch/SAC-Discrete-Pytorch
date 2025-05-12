@@ -253,11 +253,12 @@ class Model():
 			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.dvc).view(1,3,1,1)
 		self.img_size = 224
 
-	def get_fast_preprocessing(self, img_np : np.ndarray):
+	def get_fast_preprocessing(self, img_np : np.ndarray, input_height = 224, input_width = 224):
 		""""
-		img_np : N x H x W x 3 RGB image, H = 224, W = 224 because of render kwargs in the gym environment
+		img_np : N x H x W x 3 RGB image
 		"""
 		img_tensor = torch.from_numpy(img_np).permute(1,3).permute(2,3).to(device, non_blocking=True)
+		img_tensor = F.interpolate(img_tensor, size=(input_height, input_width), mode='bilinear', align_corners=False)
 		img_tensor = (img_tensor - self.mean).div(self.std)
 		return img_tensor
 
