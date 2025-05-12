@@ -70,12 +70,12 @@ def get_goal_embedding(mode, env_name = "CartPole-v1", sys_path_to_goal= None):
 		return get_image_embedding(img)
 	elif mode == "text":
 		query = QUERIES[env_name]
-		return get_text_embedding(clip.tokenize([query]))
+		return get_text_embedding(clip.tokenize([query]).to(device))
 
 
 
 def get_goal_embedding(env, query = "a cartpole standing upright"):
-    embedding = get_text_embedding(clip.tokenize([query]))
+    embedding = get_text_embedding(clip.tokenize([query]).to(device))
     return embedding
 
 def get_text_embedding(tokens, model=model):
@@ -96,7 +96,7 @@ def get_image_embedding(image, model = model):
 	"""
 	image_input = Image.fromarray(image)
 	with torch.no_grad():
-		features = model.encode_image(preprocess(image_input).unsqueeze(0))
+		features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
 		return features
 
 
@@ -149,15 +149,21 @@ class ReplayBuffer(object):
 		self.dw = torch.zeros((max_size, 1),dtype=torch.bool,device=self.dvc)
 	
 	def addAll(self, s_array, a_array,  r_array, s_next_array, dw_array):
-		for s, a, r, s_next, dw in zip(s_array, a_array, r_array, s_next_array, dw_array):
-			self.add(s,a,r,s_next,dw)
+		idx = torch.arange(self.ptr, (self.ptr+len(a_array)) %self.max_size)
+		self.s[idx] = torch.from_numpy(s_array)
+		self.a[idx] = torch.tensor([*a_array]).unsqueeze(-1)
+		self.r[idx] = torch.tensor([*r_array]).unsqueeze(-1)
+		self.s_next[idx] = torch.from_numpy(s_next_array)
+		self.dw[idx] = torch.tensor([*dw_array]).unsqueeze(-1)
+		self.ptr = (self.ptr + len(a_array)) % self.max_size
+		self.size = min(self.size + len(idx), self.max_size)
 		
 
 	def add(self, s, a, r, s_next, dw):
-		self.s[self.ptr] = torch.from_numpy(s)
+		self.s[self.ptr] = torch.from_numpy(s).to(self.dvc)
 		self.a[self.ptr] = a
 		self.r[self.ptr] = r
-		self.s_next[self.ptr] = torch.from_numpy(s_next)
+		self.s_next[self.ptr] = torch.from_numpy(s_next).to(self.dvc)
 		self.dw[self.ptr] = dw
 
 		self.ptr = (self.ptr + 1) % self.max_size
@@ -215,12 +221,11 @@ def compute_reward(a, b, dist_type = "euclidean"):
 
 def compute_rewards(rgb_imgs, goal, model=model):
 	embeddings = []
-	with torch.no_grad():
+	with torch.inference_mode():
 		embeddings = model.encode_image(rgb_imgs)
 		#print(embeddings.size(), goal.size(), rgb_imgs.size())
 		rewards = compute_reward(embeddings, goal)
 		# L2 norm squared
-		
 		return rewards
 
 
