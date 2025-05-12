@@ -243,14 +243,14 @@ class Model():
 	def __init__(self, **kwargs):
 		self.__dict__.update(kwargs)
 		if self.model == "CLIP":
-			model, _ = clip.load("ViT-B/32", device = self.device)
+			model, _ = clip.load("ViT-B/32", device = self.dvc)
 			self.model = model
-			self.std = torch.tensor([0.26862954, 0.26130258, 0.27577711], device=self.device).view(1,3,1,1)
-			self.mean = torch.tensor([0.48145466, 0.4578275, 0.40821073], device=self.device).view(1,3,1,1)
+			self.std = torch.tensor([0.26862954, 0.26130258, 0.27577711], device=self.dvc).view(1,3,1,1)
+			self.mean = torch.tensor([0.48145466, 0.4578275, 0.40821073], device=self.dvc).view(1,3,1,1)
 		elif self.model == "DINOV2":
 			model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14_reg')
-			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.device).view(1,3,1,1)
-			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.device).view(1,3,1,1)
+			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.dvc).view(1,3,1,1)
+			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.dvc).view(1,3,1,1)
 		self.img_size = 224
 
 	def get_fast_preprocessing(self, img_np : np.ndarray):
