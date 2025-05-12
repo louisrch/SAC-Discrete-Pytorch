@@ -33,7 +33,7 @@ parser.add_argument('--alpha', type=float, default=0.2, help='init alpha')
 parser.add_argument('--adaptive_alpha', type=str2bool, default=True, help='Use adaptive alpha turning')
 parser.add_argument('--distance_type', type=str, default="euclidean", help = "distance metric, either 'euclidean' or 'cosine'")
 parser.add_argument("--mode", type=str, default="image", help="image or text mode")
-parser.add_argument("--dump_every", type=int, default=10, help= "frequency at which to dump rewards in the replaybuffer")
+parser.add_argument("--dump_every", type=int, default=5, help= "frequency at which to dump rewards in the replaybuffer")
 opt = parser.parse_args()
 print(opt)
 opt.dvc = "cuda:0" if torch.cuda.is_available() else "cpu"
