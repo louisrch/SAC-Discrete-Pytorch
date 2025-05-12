@@ -96,7 +96,7 @@ def main():
 				if total_steps % opt.dump_every == 0 and total_steps != 0:
 				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
 					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions).to(opt.dvc), dws, goal_embedding, agent)
-					states = []
+					states = [s]
 					actions = []
 					dws = []
 					depictions = []
