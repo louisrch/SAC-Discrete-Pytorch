@@ -263,7 +263,7 @@ class Model():
 		img_tensor = torch.from_numpy(img_np)
 		if img_tensor.ndim == 3:
 			img_tensor = torch.unsqueeze(img_tensor, 0)
-		img_tensor = img_tensor.permute(0,3,1,2).to(device, non_blocking=True)
+		img_tensor = img_tensor.permute(0,3,1,2).to(device, non_blocking=True).float().div_(255.)
 		img_tensor = F.interpolate(img_tensor, size=(input_height, input_width), mode='bilinear', align_corners=False)
 		img_tensor = (img_tensor - self.mean).div(self.std)
 		return img_tensor
