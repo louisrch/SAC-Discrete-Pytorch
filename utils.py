@@ -218,7 +218,7 @@ def compute_reward(a, b, dist_type = "euclidean"):
 def compute_rewards(rgb_imgs, goal, model):
 	with torch.inference_mode():
 		embeddings = model.forward_image(rgb_imgs)
-		
+		print(embeddings)
 		#print(embeddings.size(), goal.size(), rgb_imgs.size())
 		rewards = compute_reward(embeddings, goal)
 		# L2 norm squared
