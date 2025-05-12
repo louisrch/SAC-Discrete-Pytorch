@@ -100,17 +100,18 @@ def main():
 				s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
 				done = (dw or tr)
 
-				depictions.append(utils.get_preprocessing(Image.fromarray(env.render())).to(opt.dvc))
+				depictions.append(utils.get_preprocessing(Image.fromarray(env.render())))
 				states.append(s)
 				actions.append(a)
 				dws.append(dw)
 				
 				if total_steps % opt.dump_every == 0:
 				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
-					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions), dws, goal_embedding, agent)
+					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions).to(opt.dvc), dws, goal_embedding, agent)
 					states = []
 					actions = []
 					dws = []
+					depictions = []
 				next_state_embedding = utils.get_current_state_embedding(env=env)
 
 				r = 1 / (utils.compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
