@@ -42,6 +42,7 @@ opt.dvc = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 def main():
 	model = utils.Model(**vars(opt))
+	print(model)
 	#Create Env
 	EnvName = ['CartPole-v1', 'LunarLander-v2']
 	BriefEnvName = ['CPV1', 'LLdV2']
