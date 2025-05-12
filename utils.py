@@ -72,7 +72,7 @@ def get_goal_embedding(env, query = "a cartpole standing upright"):
     embedding = get_text_embedding(clip.tokenize([query]).to(device))
     return embedding
 
-def get_text_embedding(tokens, model=model):
+def get_text_embedding(tokens, model):
 	with torch.no_grad():
 		return model.encode_text(tokens)
 
@@ -214,7 +214,7 @@ def compute_reward(a, b, dist_type = "euclidean"):
 	"""
 	return torch.exp(-compute_distance(a,b,dist_type=dist_type))
 
-def compute_rewards(rgb_imgs, goal, model=model):
+def compute_rewards(rgb_imgs, goal, model):
 	embeddings = []
 	with torch.inference_mode():
 		embeddings = model.encode_image(rgb_imgs)
