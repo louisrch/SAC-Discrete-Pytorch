@@ -145,15 +145,41 @@ class ReplayBuffer(object):
 	
 	def addAll(self, s_array, a_array,  r_array, s_next_array, dw_array):
 		#print(len(s_array), len(a_array), len(r_array), len(s_next_array))
-		idx = torch.arange(self.ptr, (self.ptr+len(a_array)) %self.max_size)
-		self.s[idx] = torch.from_numpy(np.stack(s_array, axis=0)).to(self.dvc)
-		self.a[idx] = torch.tensor(a_array).unsqueeze(-1).to(self.dvc)
-		self.r[idx] = r_array.clone().detach().float().to(self.dvc)
-		self.s_next[idx] = torch.from_numpy(np.stack(s_next_array, axis=0)).to(self.dvc)
-		self.dw[idx] = torch.tensor(dw_array).unsqueeze(-1).to(self.dvc)
-		self.ptr = (self.ptr + len(a_array)) % self.max_size
-		self.size = min(self.size + len(idx), self.max_size)
-		
+		begin = self.ptr
+		end = self.ptr + len(a_array) % self.max_size
+		end_array = min(self.max_size, end)
+
+		states = torch.from_numpy(np.stack(s_array, axis=0)).to(self.dvc)
+		actions = torch.tensor(a_array).unsqueeze(-1).to(self.dvc)
+		rewards = r_array.clone().detach().float().to(self.dvc)
+		next_states = torch.from_numpy(np.stack(s_next_array, axis=0)).to(self.dvc)
+		dws = torch.tensor(dw_array).unsqueeze(-1).to(self.dvc)
+
+		if end_array == end:
+			index = slice(begin, end)
+			self.s[index] = states
+			self.a[index] = actions
+			self.r[index] = rewards
+			self.s_next[index] = next_states
+			self.dw[index] = dws
+			self.ptr = end
+			self.size = min(self.size + len(a_array), self.max_size)
+		else:
+			head = self.max_size - begin
+			tail = len(a_array) - head
+
+			self.s[begin:] = states[:head]
+			self.a[begin:] = actions[:head]
+			self.r[begin:] = rewards[:head]
+			self.s_next[begin:] = next_states[:head]
+			self.dw[begin:] = dws[:head]
+
+			self.s[:tail] = states[head:]
+			self.a[:tail] = actions[head:]
+			self.r[:tail] = rewards[head:]
+			self.s_next[:tail] = next_states[head:]
+			self.dw[:tail] = dws[head:]
+			self.ptr = tail
 
 	def add(self, s, a, r, s_next, dw):
 		self.s[self.ptr] = torch.from_numpy(s).to(self.dvc)
@@ -251,7 +277,7 @@ class Model():
 			self.std = torch.tensor([0.26862954, 0.26130258, 0.27577711], device=self.dvc).view(1,3,1,1)
 			self.mean = torch.tensor([0.48145466, 0.4578275, 0.40821073], device=self.dvc).view(1,3,1,1)
 		elif self.model == "DINOV2":
-			self.encoder = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14_reg').to(self.dvc)
+			self.encoder = torch.hub.load('facebookresearch/dinov2', 'dinov2_vits14').to(self.dvc)
 			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.dvc).view(1,3,1,1)
 			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.dvc).view(1,3,1,1)
 		self.img_size = 224
