@@ -92,6 +92,7 @@ def main():
 			#distance = torch.sigmoid(compute_distance(state_embedding, goal_embedding, dist_type = opt.distance_type))
 			'''Interact & train'''
 			while not done:
+				states.append(s)
 				#e-greedy exploration
 				if total_steps % opt.dump_every == 0 and total_steps != 0:
 				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
@@ -109,7 +110,6 @@ def main():
 				done = (dw or tr)
 
 				depictions.append(utils.get_preprocessing(Image.fromarray(env.render())))
-				states.append(s)
 				actions.append(a)
 				dws.append(dw)
 				
