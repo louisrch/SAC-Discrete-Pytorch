@@ -149,7 +149,7 @@ class ReplayBuffer(object):
 		self.dw = torch.zeros((max_size, 1),dtype=torch.bool,device=self.dvc)
 	
 	def addAll(self, s_array, a_array,  r_array, s_next_array, dw_array):
-		#print(len(s_array), len(a_array), len(r_array), len(s_next_array))
+		print(len(s_array), len(a_array), len(r_array), len(s_next_array))
 		idx = torch.arange(self.ptr, (self.ptr+len(a_array)) %self.max_size)
 		self.s[idx] = torch.from_numpy(np.stack(s_array, axis=0)).to(self.dvc)
 		self.a[idx] = torch.tensor(a_array).unsqueeze(-1).to(self.dvc)
