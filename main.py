@@ -93,6 +93,14 @@ def main():
 			'''Interact & train'''
 			while not done:
 				#e-greedy exploration
+				if total_steps % opt.dump_every == 0 and total_steps != 0:
+				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
+					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions).to(opt.dvc), dws, goal_embedding, agent)
+					states = []
+					actions = []
+					dws = []
+					depictions = []
+				
 				if total_steps < opt.random_steps: 
 					a = env.action_space.sample()
 				else: 
@@ -105,23 +113,17 @@ def main():
 				actions.append(a)
 				dws.append(dw)
 				
-				if total_steps % opt.dump_every == 0:
-				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
-					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions).to(opt.dvc), dws, goal_embedding, agent)
-					states = []
-					actions = []
-					dws = []
-					depictions = []
-				next_state_embedding = utils.get_current_state_embedding(env=env)
+				
+				# next_state_embedding = utils.get_current_state_embedding(env=env)
 
-				r = 1 / (utils.compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
+				# r = 1 / (utils.compute_distance(next_state_embedding, goal_embedding, dist_type = opt.distance_type)+1)
 
 
 
 				if opt.EnvIdex == 1:
 					if r <= -100: r = -10  # good for LunarLander
 
-				agent.replay_buffer.add(s, a, r, s_next, dw)
+				#agent.replay_buffer.add(s, a, r, s_next, dw)
 				s = s_next
 
 				'''update if its time'''
