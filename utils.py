@@ -21,12 +21,6 @@ QUERIES = {
 }
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32",device=device)
-model = model.to(device)
-
-
-def get_preprocessing(img):
-	return preprocess(img)
 
 
 def create_log_gaussian(mean, log_std, t):
@@ -230,9 +224,44 @@ def compute_rewards(rgb_imgs, goal, model=model):
 		return rewards
 
 
-def dump_infos_to_replay_buffer(states, actions, depictions, dws, goal, agent):
-	#print(len(states))
-	rewards = compute_rewards(depictions, goal)
+def dump_infos_to_replay_buffer(states, actions, depictions, dws, goal, agent, model):
+	"""
+	states : list of N+1 1xS numpy arrays
+	actions : list of N actions
+	depictions : list of N+1 depiction of states, 224x224x3 numpy arrays
+	dws : list of episode completions
+	goal : embedding of the goal image
+	agent : agent at hand
+	model : embedding model
+	"""
+	preprocessed_depictions = model.get_fast_preprocessing(np.stack(depictions, axis=0))
+	rewards = compute_rewards(preprocessed_depictions, goal)
 	next_states = states[1:]
 	states = states[:-1]
 	agent.replay_buffer.addAll(states, actions, rewards, next_states, dws)
+
+
+class Model():
+	def __init__(self, **kwargs):
+		self.__dict__.update(kwargs)
+		if self.model == "CLIP":
+			model, _ = clip.load("ViT-B/32", device = self.device)
+			self.model = model
+			self.std = torch.tensor([0.26862954, 0.26130258, 0.27577711], device=self.device).view(1,3,1,1)
+			self.mean = torch.tensor([0.48145466, 0.4578275, 0.40821073], device=self.device).view(1,3,1,1)
+		elif self.model == "DINOV2":
+			model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14_reg')
+			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.device).view(1,3,1,1)
+			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.device).view(1,3,1,1)
+		self.img_size = 224
+
+	def get_fast_preprocessing(self, img_np : np.ndarray):
+		""""
+		img_np : N x H x W x 3 RGB image, H = 224, W = 224 because of render kwargs in the gym environment
+		"""
+		img_tensor = torch.from_numpy(img_np).permute(1,3).permute(2,3).to(device, non_blocking=True)
+		img_tensor = (img_tensor - self.mean).div(self.std)
+		return img_tensor
+
+
+

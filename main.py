@@ -34,17 +34,19 @@ parser.add_argument('--adaptive_alpha', type=str2bool, default=True, help='Use a
 parser.add_argument('--distance_type', type=str, default="euclidean", help = "distance metric, either 'euclidean' or 'cosine'")
 parser.add_argument("--mode", type=str, default="image", help="image or text mode")
 parser.add_argument("--dump_every", type=int, default=5, help= "frequency at which to dump rewards in the replaybuffer")
+parser.add_argument("--model", type=str, default = "CLIP", help="embedding model (CLIP, DINOV2)")
 opt = parser.parse_args()
 print(opt)
 opt.dvc = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 
 def main():
+	model = utils.Model(**vars(opt))
 	print("started")
 	#Create Env
 	EnvName = ['CartPole-v1', 'LunarLander-v2']
 	BriefEnvName = ['CPV1', 'LLdV2']
-	env = gym.make(EnvName[opt.EnvIdex], render_mode="rgb_array" if opt.render else "human")
+	env = gym.make(EnvName[opt.EnvIdex], render_mode="rgb_array" if opt.render else "human", render_kwargs={"width": 224, "height": 224})
 	eval_env = gym.make(EnvName[opt.EnvIdex])
 	opt.state_dim = env.observation_space.shape[0]
 	opt.action_dim = env.action_space.n
@@ -65,7 +67,7 @@ def main():
 		from torch.utils.tensorboard import SummaryWriter
 		timenow = str(datetime.now())
 		writepath = 'runs/SACD_{}'.format(BriefEnvName[opt.EnvIdex]) + timenow
-		if os.path.exists(writepath): 
+		if os.path.exists(writepath):
 			shutil.rmtree(writepath)
 		writer = SummaryWriter(log_dir=writepath)
 
@@ -82,7 +84,7 @@ def main():
 		dws = []
 		s, _ = env.reset(seed=env_seed)
 
-		goal_embedding = utils.get_goal_embedding(env)
+		goal_embedding = utils.get_goal_embedding(env, model)
 		states = []
 		while total_steps < opt.Max_train_steps:
 			s, info = env.reset(seed=env_seed)  # Do not use opt.seed directly, or it can overfit to opt.seed
@@ -95,7 +97,7 @@ def main():
 				#e-greedy exploration
 				if total_steps % opt.dump_every == 0 and total_steps != 0:
 				# 	# we do this to (hopefully) optimize the process of adding stuff to the replay buffer
-					utils.dump_infos_to_replay_buffer(states, actions, torch.stack(depictions).to(opt.dvc), dws, goal_embedding, agent)
+					utils.dump_infos_to_replay_buffer(states, actions, depictions, dws, goal_embedding, agent, model)
 					states = [s]
 					actions = []
 					dws = []
@@ -108,7 +110,7 @@ def main():
 				s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
 				done = (dw or tr)
 
-				depictions.append(utils.get_preprocessing(Image.fromarray(env.render())))
+				depictions.append(env.render())
 				actions.append(a)
 				dws.append(dw)
 				
