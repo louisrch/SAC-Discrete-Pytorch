@@ -255,23 +255,24 @@ class Model():
 			self.std = torch.tensor([0.229, 0.224, 0.225], device=self.dvc).view(1,3,1,1)
 			self.mean = torch.tensor([0.485, 0.456, 0.406], device=self.dvc).view(1,3,1,1)
 		self.img_size = 224
-		#print(self.__dict__)
+		print(self.__dict__)
 
-	def get_fast_preprocessing(self, img_np : np.ndarray, input_height = 224, input_width = 224):
+	def get_fast_preprocessing(self, img_np : np.ndarray, output_height : int = 224, output_width : int = 224) -> torch.Tensor:
 		""""
 		img_np : N x H x W x 3 RGB image
-		output : N x 3 x input_height x input_width image
+		output : N x 3 x output_height x output_width image
 		"""
 		img_tensor = torch.from_numpy(img_np)
 		if img_tensor.ndim == 3:
 			img_tensor = torch.unsqueeze(img_tensor, 0)
 		img_tensor = img_tensor.permute(0,3,1,2).to(device, non_blocking=True).float().div_(255.)
-		img_tensor = F.interpolate(img_tensor, size=(input_height, input_width), mode='bilinear', align_corners=False)
+		img_tensor = F.interpolate(img_tensor, size=(output_height, output_width), mode='bilinear', align_corners=False)
 		img_tensor = (img_tensor - self.mean).div(self.std)
 		return img_tensor
 
-	def forward_image(self, image):
+	def forward_image(self, image : torch.Tensor) -> torch.Tensor:
 		if self.model == "CLIP":
+			print("here", image.size())
 			return self.model.encode_image(image)
 		elif self.model == "DINOV2":
 			return self.model.forward(image)
