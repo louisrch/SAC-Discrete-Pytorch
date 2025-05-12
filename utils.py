@@ -235,7 +235,7 @@ def dump_infos_to_replay_buffer(states, actions, depictions, dws, goal, agent, m
 	model : embedding model
 	"""
 	preprocessed_depictions = model.get_fast_preprocessing(np.stack(depictions, axis=0))
-	rewards = compute_rewards(preprocessed_depictions, goal)
+	rewards = compute_rewards(preprocessed_depictions, goal, model)
 	next_states = states[1:]
 	states = states[:-1]
 	agent.replay_buffer.addAll(states, actions, rewards, next_states, dws)
