@@ -75,7 +75,7 @@ def get_goal_embedding(mode, env_name = "CartPole-v1", sys_path_to_goal= None):
 
 
 def get_goal_embedding(env, query = "a cartpole standing upright"):
-    embedding = get_text_embedding(clip.tokenize([query]).to(device))
+    embedding = get_text_embedding(clip.tokenize([query]))
     return embedding
 
 def get_text_embedding(tokens, model=model):
@@ -96,7 +96,7 @@ def get_image_embedding(image, model = model):
 	"""
 	image_input = Image.fromarray(image)
 	with torch.no_grad():
-		features = model.encode_image(preprocess(image_input).unsqueeze(0).to(device))
+		features = model.encode_image(preprocess(image_input).unsqueeze(0))
 		return features
 
 
@@ -154,10 +154,10 @@ class ReplayBuffer(object):
 		
 
 	def add(self, s, a, r, s_next, dw):
-		self.s[self.ptr] = torch.from_numpy(s).to(self.dvc)
+		self.s[self.ptr] = torch.from_numpy(s)
 		self.a[self.ptr] = a
 		self.r[self.ptr] = r
-		self.s_next[self.ptr] = torch.from_numpy(s_next).to(self.dvc)
+		self.s_next[self.ptr] = torch.from_numpy(s_next)
 		self.dw[self.ptr] = dw
 
 		self.ptr = (self.ptr + 1) % self.max_size
