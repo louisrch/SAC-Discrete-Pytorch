@@ -45,7 +45,7 @@ def main():
 	#Create Env
 	EnvName = ['CartPole-v1', 'LunarLander-v2']
 	BriefEnvName = ['CPV1', 'LLdV2']
-	env = gym.make(EnvName[opt.EnvIdex], render_mode="rgb_array" if opt.render else "human", render_kwargs={"width": 224, "height": 224})
+	env = gym.make(EnvName[opt.EnvIdex], render_mode="rgb_array" if opt.render else "human")
 	eval_env = gym.make(EnvName[opt.EnvIdex])
 	opt.state_dim = env.observation_space.shape[0]
 	opt.action_dim = env.action_space.n
